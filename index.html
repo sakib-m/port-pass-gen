@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP Port & Password Generator</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #2c3e50;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --border-color: #e1e5e9;
+            --border-light: #f0f0f0;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.15);
+            --button-bg: #2c3e50;
+            --button-hover: #34495e;
+            --button-secondary: #495057;
+            --button-secondary-hover: #6c757d;
+            --success-color: #28a745;
+            --accent-color: #007bff;
+            --input-bg: #ffffff;
+            --checkbox-bg: #ffffff;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #1a1a1a;
+                --bg-secondary: #2d2d2d;
+                --bg-tertiary: #404040;
+                --text-primary: #e0e0e0;
+                --text-secondary: #b0b0b0;
+                --text-muted: #888;
+                --border-color: #404040;
+                --border-light: #333;
+                --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+                --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.4);
+                --button-bg: #4a5568;
+                --button-hover: #5a6478;
+                --button-secondary: #718096;
+                --button-secondary-hover: #8796a6;
+                --success-color: #48bb78;
+                --accent-color: #4299e1;
+                --input-bg: #2d2d2d;
+                --checkbox-bg: #404040;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .card {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            text-align: center;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+
+        .port-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
+            transition: all 0.2s ease;
+        }
+
+        .port-row:hover {
+            background: var(--bg-secondary);
+            margin: 0 -16px;
+            padding: 12px 16px;
+            border-radius: 6px;
+        }
+
+        .port-row:last-of-type {
+            border-bottom: none;
+        }
+
+        .port-label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .port-number {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'JetBrains Mono', monospace;
+            background: var(--bg-secondary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            background: var(--button-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.copy-btn {
+            background: var(--button-secondary);
+        }
+
+        .btn.copy-btn:hover {
+            background: var(--button-secondary-hover);
+        }
+
+        .btn.copied {
+            background: var(--success-color);
+        }
+
+        .password-container {
+            margin-bottom: 20px;
+        }
+
+        .password-output {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            resize: none;
+            min-height: 60px;
+            word-break: break-all;
+            transition: all 0.2s ease;
+        }
+
+        .password-output:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--checkbox-bg);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox input {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .checkbox input:checked + .checkmark {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .checkbox input:checked + .checkmark::after {
+            opacity: 1;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: var(--checkbox-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .checkmark::after {
+            content: "";
+            position: absolute;
+            left: 4px;
+            top: 1px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .checkbox-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--button-bg);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .card {
+                padding: 24px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }
+
+        /* Smooth animations */
+        .port-number,
+        .password-output,
+        .btn,
+        .form-input,
+        .checkmark {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Focus indicators */
+        .btn:focus,
+        .form-input:focus,
+        .password-output:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        /* Hover effects */
+        .port-number:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .checkbox:hover .checkmark {
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="card">
+            <h1 class="card-title">TCP Port Generator</h1>
+            
+            <div class="port-row">
+                <div class="port-label">HTTP:</div>
+                <div class="port-number" id="http-port">18080</div>
+            </div>
+            
+            <div class="port-row">
+                <div class="port-label">HTTPS:</div>
+                <div class="port-number" id="https-port">18443</div>
+            </div>
+            
+            <div class="port-row">
+                <div class="port-label">LuCI HTTP:</div>
+                <div class="port-number" id="luci-http-port">18081</div>
+            </div>
+            
+            <div class="port-row">
+                <div class="port-label">LuCI HTTPS:</div>
+                <div class="port-number" id="luci-https-port">18444</div>
+            </div>
+            
+            <div class="port-row">
+                <div class="port-label">SSH:</div>
+                <div class="port-number" id="ssh-port">12222</div>
+            </div>
+            
+            <div class="port-row">
+                <div class="port-label">WG:</div>
+                <div class="port-number" id="wg-port">51820</div>
+            </div>
+            
+            <div class="port-row">
+                <div class="port-label">BACKUP:</div>
+                <div class="port-number" id="backup-port">19999</div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn" onclick="generatePorts()">Generate Again</button>
+                <button class="btn copy-btn" id="copyPortsBtn" onclick="copyAllPorts()">Copy All</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h1 class="card-title">Password Generator</h1>
+            
+            <div class="password-container">
+                <textarea class="password-output" id="passwordOutput" readonly placeholder="Generated password will appear here..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="passwordLength">Password Length</label>
+                <input type="number" id="passwordLength" class="form-input" value="16" min="4" max="128">
+            </div>
+
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <label class="checkbox">
+                        <input type="checkbox" id="includeUppercase" checked>
+                        <span class="checkmark"></span>
+                    </label>
+                    <label for="includeUppercase" class="checkbox-label">Uppercase</label>
+                </div>
+                
+                <div class="checkbox-item">
+                    <label class="checkbox">
+                        <input type="checkbox" id="includeLowercase" checked>
+                        <span class="checkmark"></span>
+                    </label>
+                    <label for="includeLowercase" class="checkbox-label">Lowercase</label>
+                </div>
+                
+                <div class="checkbox-item">
+                    <label class="checkbox">
+                        <input type="checkbox" id="includeNumbers" checked>
+                        <span class="checkmark"></span>
+                    </label>
+                    <label for="includeNumbers" class="checkbox-label">Numbers</label>
+                </div>
+                
+                <div class="checkbox-item">
+                    <label class="checkbox">
+                        <input type="checkbox" id="includeSymbols" checked>
+                        <span class="checkmark"></span>
+                    </label>
+                    <label for="includeSymbols" class="checkbox-label">Symbols</label>
+                </div>
+                
+                <div class="checkbox-item">
+                    <label class="checkbox">
+                        <input type="checkbox" id="avoidEdgeSymbols" checked>
+                        <span class="checkmark"></span>
+                    </label>
+                    <label for="avoidEdgeSymbols" class="checkbox-label">Clean Edges</label>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn" onclick="generatePassword()">Generate Password</button>
+                <button class="btn copy-btn" id="copyPasswordBtn" onclick="copyPassword()">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Copied to clipboard!</div>
+
+    <script>
+        // Port Generator Functions
+        function getRandomPort() {
+            return Math.floor(Math.random() * (65535 - 10000 + 1)) + 10000;
+        }
+
+        function generatePorts() {
+            const services = ['http', 'https', 'luci-http', 'luci-https', 'ssh', 'wg', 'backup'];
+            const usedPorts = new Set();
+            
+            services.forEach(service => {
+                let port;
+                do {
+                    port = getRandomPort();
+                } while (usedPorts.has(port));
+                
+                usedPorts.add(port);
+                document.getElementById(service + '-port').textContent = port;
+            });
+        }
+
+        function copyAllPorts() {
+            const services = ['http', 'https', 'luci-http', 'luci-https', 'ssh', 'wg', 'backup'];
+            const labels = ['HTTP', 'HTTPS', 'LuCI HTTP', 'LuCI HTTPS', 'SSH', 'WG', 'BACKUP'];
+            
+            let copyText = '';
+            services.forEach((service, index) => {
+                const port = document.getElementById(service + '-port').textContent;
+                copyText += `${labels[index]}: ${port}\n`;
+            });
+            
+            navigator.clipboard.writeText(copyText.trim()).then(() => {
+                showToast('All ports copied to clipboard!');
+                showButtonFeedback('copyPortsBtn', 'Copied!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        // Password Generator Functions
+        function generatePassword() {
+            const length = parseInt(document.getElementById('passwordLength').value);
+            const includeUppercase = document.getElementById('includeUppercase').checked;
+            const includeLowercase = document.getElementById('includeLowercase').checked;
+            const includeNumbers = document.getElementById('includeNumbers').checked;
+            const includeSymbols = document.getElementById('includeSymbols').checked;
+            const avoidEdgeSymbols = document.getElementById('avoidEdgeSymbols').checked;
+
+            if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
+                alert('Please select at least one character type!');
+                return;
+            }
+
+            let charset = '';
+            let edgeCharset = ''; // Characters safe for first/last position
+            
+            if (includeUppercase) {
+                charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                edgeCharset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            }
+            if (includeLowercase) {
+                charset += 'abcdefghijklmnopqrstuvwxyz';
+                edgeCharset += 'abcdefghijklmnopqrstuvwxyz';
+            }
+            if (includeNumbers) {
+                charset += '0123456789';
+                edgeCharset += '0123456789';
+            }
+            if (includeSymbols) {
+                charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+            }
+
+            let password = '';
+            
+            if (length === 1) {
+                // Single character - use edge charset if avoiding symbols at edges
+                const useCharset = (avoidEdgeSymbols && edgeCharset) ? edgeCharset : charset;
+                password = useCharset.charAt(Math.floor(Math.random() * useCharset.length));
+            } else if (length === 2 && avoidEdgeSymbols && edgeCharset) {
+                // Two characters - both should be from edge charset
+                password += edgeCharset.charAt(Math.floor(Math.random() * edgeCharset.length));
+                password += edgeCharset.charAt(Math.floor(Math.random() * edgeCharset.length));
+            } else {
+                // Generate first character
+                if (avoidEdgeSymbols && edgeCharset && length > 1) {
+                    password += edgeCharset.charAt(Math.floor(Math.random() * edgeCharset.length));
+                } else {
+                    password += charset.charAt(Math.floor(Math.random() * charset.length));
+                }
+                
+                // Generate middle characters
+                for (let i = 1; i < length - 1; i++) {
+                    password += charset.charAt(Math.floor(Math.random() * charset.length));
+                }
+                
+                // Generate last character (if length > 1)
+                if (length > 1) {
+                    if (avoidEdgeSymbols && edgeCharset) {
+                        password += edgeCharset.charAt(Math.floor(Math.random() * edgeCharset.length));
+                    } else {
+                        password += charset.charAt(Math.floor(Math.random() * charset.length));
+                    }
+                }
+            }
+
+            document.getElementById('passwordOutput').textContent = password;
+        }
+
+        function copyPassword() {
+            const password = document.getElementById('passwordOutput').textContent;
+            if (!password) {
+                alert('Please generate a password first!');
+                return;
+            }
+
+            navigator.clipboard.writeText(password).then(() => {
+                showToast('Password copied to clipboard!');
+                showButtonFeedback('copyPasswordBtn', 'Copied!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        // Utility Functions
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        function showButtonFeedback(buttonId, text) {
+            const button = document.getElementById(buttonId);
+            const originalText = button.textContent;
+            
+            button.textContent = text;
+            button.classList.add('copied');
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('copied');
+            }, 2000);
+        }
+
+        // Auto-generate on input change
+        document.getElementById('passwordLength').addEventListener('input', generatePassword);
+        document.getElementById('includeUppercase').addEventListener('change', generatePassword);
+        document.getElementById('includeLowercase').addEventListener('change', generatePassword);
+        document.getElementById('includeNumbers').addEventListener('change', generatePassword);
+        document.getElementById('includeSymbols').addEventListener('change', generatePassword);
+        document.getElementById('avoidEdgeSymbols').addEventListener('change', generatePassword);
+
+        // Initialize on page load
+        window.onload = function() {
+            generatePorts();
+            generatePassword();
+        }
+    </script>
+</body>
+</html>
