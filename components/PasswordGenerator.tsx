@@ -21,7 +21,7 @@ interface PasswordGeneratorProps {
 
 const PasswordGenerator: React.FC<PasswordGeneratorProps> = ({ showToast }) => {
   const [password, setPassword] = useState('');
-  const [history, setHistory] = useState<string[]>([]);
+  const [lastPassword, setLastPassword] = useState<string>('');
   const [length, setLength] = useState(16);
   const [options, setOptions] = useState<PasswordOptions>({
     uppercase: true,
@@ -32,6 +32,13 @@ const PasswordGenerator: React.FC<PasswordGeneratorProps> = ({ showToast }) => {
   });
   const [copyButtonText, setCopyButtonText] = useState('Copy');
   const [strength, setStrength] = useState({ score: 0, label: '', className: '' });
+
+  useEffect(() => {
+    const storedLastPassword = localStorage.getItem('lastPassword');
+    if (storedLastPassword) {
+      setLastPassword(storedLastPassword);
+    }
+  }, []);
 
   const calculatePasswordStrength = useCallback((pw: string) => {
     if (!pw) {
@@ -90,15 +97,15 @@ const PasswordGenerator: React.FC<PasswordGeneratorProps> = ({ showToast }) => {
         }
     }
 
-    setPassword(newPassword);
+    setPassword(currentPassword => {
+        if (currentPassword && newPassword !== currentPassword) {
+            setLastPassword(currentPassword);
+            localStorage.setItem('lastPassword', currentPassword);
+        }
+        return newPassword;
+    });
     calculatePasswordStrength(newPassword);
 
-    if (newPassword && newPassword !== password) {
-      setHistory(prev => {
-        const newHistory = [newPassword, ...prev.filter(p => p !== newPassword)];
-        return newHistory.slice(0, 5);
-      });
-    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [length, options, calculatePasswordStrength]);
 
@@ -120,11 +127,6 @@ const PasswordGenerator: React.FC<PasswordGeneratorProps> = ({ showToast }) => {
       }
     });
   };
-  
-  const handleClearHistory = () => {
-    setHistory([]);
-    showToast('History cleared!');
-  }
 
   return (
     <div className="card">
@@ -180,6 +182,21 @@ const PasswordGenerator: React.FC<PasswordGeneratorProps> = ({ showToast }) => {
         </div>
       </div>
       
+      <div className="last-password-container">
+        {lastPassword && (
+          <>
+            <span className="last-password-label">Last:</span>
+            <span 
+              className="last-password-value"
+              onClick={() => handleCopy(lastPassword, 'history')}
+              title="Click to copy"
+            >
+              {lastPassword}
+            </span>
+          </>
+        )}
+      </div>
+
       <div className="button-group">
         <button className="btn" onClick={generatePassword}>Generate Password</button>
         <button 
@@ -189,29 +206,6 @@ const PasswordGenerator: React.FC<PasswordGeneratorProps> = ({ showToast }) => {
           {copyButtonText}
         </button>
       </div>
-
-      {history.length > 0 && (
-        <div className="history-container">
-          <div className="history-header">
-            <h2 className="history-title">History</h2>
-            <button className="clear-history-btn" onClick={handleClearHistory} title="Clear history">Clear</button>
-          </div>
-          <div className="history-list-wrapper">
-            <ul className="history-list">
-              {history.map((p, i) => (
-                <li 
-                  key={`${p}-${i}`} 
-                  className="history-item"
-                  onClick={() => handleCopy(p, 'history')}
-                  title="Click to copy"
-                >
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -56,6 +56,7 @@
             background-size: 24px 24px;
             color: var(--text-primary);
             transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
         }
 
         * {
@@ -71,7 +72,6 @@
             justify-content: center;
             padding: 20px;
             line-height: 1.6;
-            overflow-x: hidden;
         }
 
         #root {
@@ -408,75 +408,35 @@
             transform: translateX(0);
         }
 
-        .history-container {
+        .last-password-container {
             margin-top: 24px;
-            border-top: 1px solid var(--border-light);
             padding-top: 16px;
-        }
-        .history-header {
+            border-top: 1px solid var(--border-light);
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-        }
-        .history-title {
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            margin: 0;
-        }
-        .clear-history-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: color 0.2s ease;
-            padding: 4px;
-        }
-        .clear-history-btn:hover {
-            color: var(--accent-color);
-        }
-        .history-list-wrapper {
-            max-height: 145px;
-            overflow-y: auto;
-            padding-right: 8px;
-        }
-        .history-list {
-            list-style: none;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
             gap: 8px;
-        }
-        .history-item {
-            background: var(--bg-secondary);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'JetBrains Mono', monospace;
             font-size: 0.9rem;
-            cursor: pointer;
-            transition: background-color 0.2s ease, border-color 0.2s ease;
+            color: var(--text-secondary);
+            min-height: 40px; /* Prevents layout shift */
+        }
+        .last-password-label {
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        .last-password-value {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'JetBrains Mono', monospace;
             word-break: break-all;
-            border: 1px solid transparent;
+            cursor: pointer;
+            background: var(--bg-secondary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
         }
-        .history-item:hover {
+        .last-password-value:hover {
             background: var(--bg-tertiary);
-            border-color: var(--accent-color);
-        }
-        .history-list-wrapper::-webkit-scrollbar {
-            width: 6px;
-        }
-        .history-list-wrapper::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .history-list-wrapper::-webkit-scrollbar-thumb {
-            background: var(--bg-tertiary);
-            border-radius: 3px;
-        }
-        .history-list-wrapper::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
+            color: var(--text-primary);
         }
         
         .strength-bar-container {
@@ -564,6 +524,9 @@
             }
             .button-group {
               flex-direction: column;
+            }
+            .checkbox-group {
+                grid-template-columns: 1fr;
             }
         }
     </style>
