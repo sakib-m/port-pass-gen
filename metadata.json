@@ -1,0 +1,5 @@
+{
+  "name": "Dev Utilities: Port & Password Generator",
+  "description": "A sleek and modern utility application for generating random TCP ports for common services and creating strong, customizable passwords. Designed for developers and network administrators, it features a clean, dark-themed interface for easy use.",
+  "requestFramePermissions": []
+}
